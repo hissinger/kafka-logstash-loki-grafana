@@ -1,0 +1,53 @@
+version: "2"
+
+services:
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    volumes:
+      - ./loki/data:/loki
+      - ./loki/config/local-config.yaml:/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+  logstash:
+    container_name: logstash
+    image: grafana/logstash-output-loki
+    volumes:
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+      - ./logstash/pipeline/loki.conf:/usr/share/logstash/pipeline/loki.conf
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    restart: unless-stopped
+    depends_on:
+      - kafka
+  zookeeper:
+    container_name: zookeeper
+    image: docker.io/bitnami/zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    restart: unless-stopped
+  kafka:
+    container_name: kafka
+    image: docker.io/bitnami/kafka:latest
+    hostname: ${KAFKA_ADDRESS}
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_HOST_NAME=${KAFKA_ADDRESS}
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
