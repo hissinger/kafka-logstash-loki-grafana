@@ -8,8 +8,6 @@
 
 ### Install docker
 
-https://docs.docker.com/engine/install/centos/ 참고
-
 ```
 sudo yum remove docker \
                   docker-client \
@@ -65,7 +63,16 @@ input {
         decorate_events => true
     }
 }
-...
+```
+
+### Change ID & Password For Grafana
+
+You can change the ip&password in `grafana/grafana.ini`.
+
+```
+[security]
+admin_user = root
+admin_password = 1234
 ```
 
 ## Start & Stop
