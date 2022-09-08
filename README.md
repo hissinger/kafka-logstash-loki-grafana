@@ -1,4 +1,4 @@
-# Kakfa + Logstash + Loki + Grafana
+# Kafka + Logstash + Loki + Grafana
 
 ## Architecture
 
